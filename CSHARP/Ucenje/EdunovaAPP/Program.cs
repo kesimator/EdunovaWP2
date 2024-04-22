@@ -61,9 +61,10 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseStaticFiles();
 
 app.UseDefaultFiles();
 app.UseDeveloperExceptionPage();
-app.MapFallbackToFile("Index.html");
+app.MapFallbackToFile("index.html");
 
 app.Run();
