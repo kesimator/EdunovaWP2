@@ -45,8 +45,8 @@ builder.Services.AddDbContext<EdunovaContext>(o =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     // mogućnost generiranja poziva rute u CMD i Powershell
     app.UseSwaggerUI(opcije =>
@@ -54,12 +54,16 @@ if (app.Environment.IsDevelopment())
         opcije.ConfigObject.
         AdditionalItems.Add("requestSnippetsEnabled", true);
     });
-}
+//}
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseDefaultFiles();
+app.UseDeveloperExceptionPage();
+app.MapFallbackToFile("Index.html");
 
 app.Run();

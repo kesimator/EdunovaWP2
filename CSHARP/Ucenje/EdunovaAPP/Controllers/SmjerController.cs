@@ -1,50 +1,61 @@
 ﻿using EdunovaAPP.Data;
 using EdunovaAPP.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
+using Microsoft.Data.SqlClient;
 
 namespace EdunovaAPP.Controllers
 {
     /// <summary>
-    /// Namijenjeno za CRUD operacije nad entitetom smjer u bazi
+    /// Namjenjeno za CRUD operacije nad entitetom smjer u bazi
     /// </summary>
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class SmjerController : EdunovaController<Smjer,SmjerDTORead,SmjerDTOInsertUpdate>
+    public class SmjerController : ControllerBase
     {
-        public SmjerController(EdunovaContext context) : base(context)
+        /// <summary>
+        /// Kontest za rad s bazom koji će biti postavljen s pomoću Dependecy Injection-om
+        /// </summary>
+        private readonly EdunovaContext _context;
+        /// <summary>
+        /// Konstruktor klase koja prima Edunova kontext
+        /// pomoću DI principa
+        /// </summary>
+        /// <param name="context"></param>
+        public SmjerController(EdunovaContext context)
         {
-            DbSet=_context.Smjerovi;
+            _context = context;
         }
 
 
-
+        /// <summary>
+        /// Dohvaća sve smjerove iz baze
+        /// </summary>
+        /// <remarks>
+        /// Primjer upita
+        /// 
+        ///    GET api/v1/Smjer
+        ///    
+        /// </remarks>
+        /// <returns>Smjerovi u bazi</returns>
+        /// <response code="200">Sve OK, ako nema podataka content-length: 0 </response>
+        /// <response code="400">Zahtjev nije valjan</response>
+        /// <response code="503">Baza na koju se spajam nije dostupna</response>
         [HttpGet]
-        [Route("Oznake/{sifraSmjera:int}")]
-        public IActionResult GetOznake(int sifraSmjera)
+        public IActionResult Get()
         {
             // kontrola ukoliko upit nije valjan
-            if (!ModelState.IsValid || sifraSmjera <= 0)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             try
             {
-                var oznake = _context.SmjeroviOznake
-                    .Include(i => i.Oznaka)
-                    .Include(i => i.Smjer)
-                    .Where(x => x.Smjer.Sifra == sifraSmjera).ToList();
-                if (oznake == null)
+                var smjerovi = _context.Smjerovi.ToList();
+                if (smjerovi == null || smjerovi.Count == 0)
                 {
-                    return BadRequest("Ne postoje oznake s šifrom " + sifraSmjera + " u bazi");
+                    return new EmptyResult();
                 }
-
-                // nisam radio posebno mapper
-                List<SmjerOznakaDTORead> lista = new List<SmjerOznakaDTORead>();
-                oznake.ForEach(x => lista.Add(new SmjerOznakaDTORead(x.Sifra,x.Oznaka.Naziv,x.napomena)));
-          
-                return new JsonResult(lista);
+                return new JsonResult(smjerovi);
             }
             catch (Exception ex)
             {
@@ -53,135 +64,154 @@ namespace EdunovaAPP.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Dodaje novi smjer u bazu
+        /// </summary>
+        /// <remarks>
+        ///     POST api/v1/Smjer
+        ///     {naziv: "Primjer naziva"}
+        /// </remarks>
+        /// <param name="smjer">Smjer za unijeti u JSON formatu</param>
+        /// <response code="201">Kreirano</response>
+        /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
+        /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
+        /// <returns>Smjer s šifrom koju je dala baza</returns>
         [HttpPost]
-        [Route("DodajOznaku")]
-        public IActionResult DodajOznaku(SmjerOznakaDTOInsertUpdate dto)
+        public IActionResult Post(Smjer smjer)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || smjer == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
             try
             {
-                var smjer = _context.Smjerovi.Find(dto.smjerSifra);
-
-                if (smjer == null)
-                {
-                    throw new Exception("Ne postoji smjer s šifrom " + dto.smjerSifra + " u bazi");
-                }
-
-                var oznaka = _context.Oznake.Find(dto.oznakaSifra);
-
-                if (oznaka == null)
-                {
-                    throw new Exception("Ne postoji oznaka s šifrom " + dto.oznakaSifra + " u bazi");
-                }
-
-                var entitet = new SmjerOznaka() { Smjer = smjer, Oznaka = oznaka, napomena = dto.napomena };
-
-                _context.SmjeroviOznake.Add(entitet);
+                _context.Smjerovi.Add(smjer);
                 _context.SaveChanges();
-
-                return new JsonResult(new SmjerOznakaDTORead(entitet.Sifra,entitet.Oznaka.Naziv,entitet.napomena));
+                return StatusCode(StatusCodes.Status201Created, smjer);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Mijenja podatke postojećeg smjera u bazi
+        /// </summary>
+        /// <remarks>
+        /// Primjer upita:
+        ///
+        ///    PUT api/v1/smjer/1
+        ///
+        /// {
+        ///  "sifra": 0,
+        ///  "naziv": "Novi naziv",
+        ///  "trajanje": 120,
+        ///  "cijena": 890.22,
+        ///  "upisnina": 0,
+        ///  "verificiran": true
+        /// }
+        ///
+        /// </remarks>
+        /// <param name="sifra">Šifra smjera koji se mijenja</param>  
+        /// <param name="smjer">Smjer za unijeti u JSON formatu</param>  
+        /// <returns>Svi poslani podaci od smjera koji su spremljeni u bazi</returns>
+        /// <response code="200">Sve je u redu</response>
+        /// <response code="204">Nema u bazi smjera kojeg želimo promijeniti</response>
+        /// <response code="415">Nismo poslali JSON</response> 
+        /// <response code="503">Baza nedostupna</response> 
+        [HttpPut]
+        [Route("{sifra:int}")]
+        public IActionResult Put(int sifra, Smjer smjer)
+        {
+            if (sifra <= 0 || !ModelState.IsValid || smjer == null)
+            {
+                return BadRequest();
+            }
+
+
+            try
+            {
+
+
+                var smjerIzBaze = _context.Smjerovi.Find(sifra);
+
+                if (smjerIzBaze == null)
+                {
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
+                }
+
+
+                // inače ovo rade mapperi
+                // za sada ručno
+                smjerIzBaze.Naziv = smjer.Naziv;
+                smjerIzBaze.Trajanje = smjer.Trajanje;
+                smjerIzBaze.Cijena = smjer.Cijena;
+                smjerIzBaze.Upisnina = smjer.Upisnina;
+                smjerIzBaze.Verificiran = smjer.Verificiran;
+
+                _context.Smjerovi.Update(smjerIzBaze);
+                _context.SaveChanges();
+
+                return StatusCode(StatusCodes.Status200OK, smjerIzBaze);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ex.Message);
             }
 
         }
 
-
-
+        /// <summary>
+        /// Briše smjer iz baze
+        /// </summary>
+        /// <remarks>
+        /// Primjer upita:
+        ///
+        ///    DELETE api/v1/smjer/1
+        ///    
+        /// </remarks>
+        /// <param name="sifra">Šifra smjera koji se briše</param>  
+        /// <returns>Odgovor da li je obrisano ili ne</returns>
+        /// <response code="200">Sve je u redu, obrisano je u bazi</response>
+        /// <response code="204">Nema u bazi smjera kojeg želimo obrisati</response>
+        /// <response code="503">Problem s bazom</response> 
         [HttpDelete]
-        [Route("ObrisiOznaku/{sifra:int}")]
-        public IActionResult ObrisiOznaku(int sifra)
+        [Route("{sifra:int}")]
+        [Produces("application/json")]
+        public IActionResult Delete(int sifra)
         {
-
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || sifra <= 0)
             {
-                return BadRequest(ModelState);
-            }
-
-            if (sifra <= 0 )
-            {
-                return BadRequest("Šifra oznake nije dobra");
+                return BadRequest();
             }
 
             try
             {
+                var smjerIzbaze = _context.Smjerovi.Find(sifra);
 
-                var entitet = _context.SmjeroviOznake.Find(sifra);
-
-                if (entitet == null)
+                if (smjerIzbaze == null)
                 {
-                    return BadRequest("Ne postoji oznaka na smjeru s šifrom " + sifra + " u bazi");
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                _context.SmjeroviOznake.Remove(entitet);
+                _context.Smjerovi.Remove(smjerIzbaze);
                 _context.SaveChanges();
 
-                return Ok("Obrisano");
+                return new JsonResult("{\"poruka\": \"Obrisano\"}"); // ovo nije baš najbolja praksa ali da znake kako i to može
 
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-
-            }
-
-        }
-
-        [HttpPatch]
-        [Route("PromjeniOznaku/{sifra:int}")]
-        public IActionResult PromjeniOznaku(int sifra, string napomena)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-
-                var entitet = _context.SmjeroviOznake.Include(x=>x.Oznaka).FirstOrDefault(x=>x.Sifra==sifra);
-
-                if(entitet==null)
-                {
-                    return BadRequest("Ne postoji oznaka na na smjeru s šifrom " + sifra + " u bazi");
-                }       
-
-                entitet.napomena = napomena;
-
-                _context.SmjeroviOznake.Update(entitet);
-                _context.SaveChanges();
-
-                return new JsonResult(new SmjerOznakaDTORead(entitet.Sifra, entitet.Oznaka.Naziv, entitet.napomena));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ex.Message);
             }
 
         }
 
 
-        protected override void KontrolaBrisanje(Smjer entitet)
-        {
-            var lista = _context.Grupe.Include(x => x.Smjer).Where(x => x.Smjer.Sifra == entitet.Sifra).ToList();
 
-            if (lista != null && lista.Count() > 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append("Smjer se ne može obrisati jer je postavljen na grupama: ");
-                foreach (var e in lista)
-                {
-                    sb.Append(e.Naziv).Append(", ");
-                }
-
-                throw new Exception(sb.ToString().Substring(0, sb.ToString().Length - 2));
-            }
-        }
-       
     }
 }
