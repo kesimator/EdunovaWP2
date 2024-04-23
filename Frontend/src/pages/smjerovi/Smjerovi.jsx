@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
-import { Container, Table } from "react-bootstrap";
+import { Button, Container, Table } from "react-bootstrap";
 import SmjerService from "../../services/SmjerService";
 import { NumericFormat } from "react-number-format";
 import { GrValidate } from "react-icons/gr";
 import { IoIosAdd } from "react-icons/io";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { MdOutlineDeleteOutline } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RoutesNames } from "../../constants";
 
 export default function Smjerovi() {
     const [smjerovi, setSmjerovi] = useState();
+    const navigate = useNavigate();
 
     async function dohvatiSmjerove() {
         await SmjerService.getSmjerovi()
@@ -37,6 +38,14 @@ export default function Smjerovi() {
         if (smjer.verificiran == null) return 'Nije definirano';
         if (smjer.verificiran) return 'Verificiran';
         return 'Nije verificiran';
+    }
+
+    async function obrisiSmjer(sifra) {
+        const odgovor = await SmjerService.obrisiSmjer(sifra);
+        if (odgovor.ok) {
+            alert(odgovor.poruka.data.poruka);
+            dohvatiSmjerove();
+        }
     }
 
     return (
@@ -100,17 +109,22 @@ export default function Smjerovi() {
                                 />
                             </td>
                             <td className="sredina">
-                                <Link to={RoutesNames.SMJEROVI_PROMIJENI}>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => { navigate(`/smjerovi/${smjer.sifra}`) }}>
                                     <FaEdit
                                         size={25}
                                     />
-                                </Link>
+                                </Button>
                                 &nbsp;&nbsp;&nbsp;
-                                <Link>
+                                <Button
+                                    variant="danger"
+                                    onClick={() => obrisiSmjer(smjer.sifra)}
+                                >
                                     <FaTrash
                                         size={25}
                                     />
-                                </Link>
+                                </Button>
                             </td>
                         </tr>
                     ))}
