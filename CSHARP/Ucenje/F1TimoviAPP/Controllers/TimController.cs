@@ -7,7 +7,7 @@ namespace F1TimoviAPP.Controllers
     /// Namijenjeno za CRUD operacije nad entitetom Tim u bazi
     /// </summary>
     [ApiController]
-    [Route("api/v1[controller]")]
+    [Route("api/v1/[controller]")]
     public class TimController : ControllerBase
     {
         /// <summary>
@@ -31,6 +31,7 @@ namespace F1TimoviAPP.Controllers
         /// Primjer upita
         /// 
         ///     GET api/v1/Tim
+        ///     
         /// </remarks>
         /// <returns>Timovi u bazi</returns>
         /// <response code="200">Sve OK</response>
