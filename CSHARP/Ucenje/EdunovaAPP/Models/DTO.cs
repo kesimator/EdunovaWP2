@@ -23,12 +23,11 @@
         string email, string oib, string iban);
 
 
-    /*
-     * IDEJA: u ekstenziji MappingGrupa ručno postaviti vrijednosti u record
-    public record GrupaDTORead(int sifra, string naziv, string predavac,
-        string smjer, int maksimalnopolaznika, DateTime datumpocetka, int brojpolaznika);
-    */
 
+    public record GrupaDTORead(int sifra, string naziv, string smjer, string predavac, 
+        int brojpolaznika, DateTime? datumpocetka, int? maksimalnopolaznika);
+
+    /*
     public class GrupaDTORead
     {
         public int? sifra { get; set; }
@@ -39,7 +38,8 @@
         public int? maksimalnopolaznika { get; set; }
         public int? brojpolaznika { get; set; }
     }
+    */
 
     public record GrupaDTOInsertUpdate(string naziv, int predavac,
-        int smjer, int maksimalnopolaznika, DateTime datumpocetka, int brojpolaznika);
+        int smjer, DateTime? datumpocetka, int? maksimalnopolaznika=0);
 }

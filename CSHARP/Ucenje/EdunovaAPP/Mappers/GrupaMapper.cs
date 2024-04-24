@@ -5,6 +5,7 @@ namespace EdunovaAPP.Mappers
 {
     public class GrupaMapper
     {
+        /*
         public static Mapper InicijalizirajReadToDTO()
         {
             return new Mapper(
@@ -18,8 +19,9 @@ namespace EdunovaAPP.Mappers
                 })
                 );
         }
+        */
 
-
+        /*
         public static Mapper InicijalizirajInsertUpdateToDTO()
         {
             return new Mapper(
@@ -33,6 +35,6 @@ namespace EdunovaAPP.Mappers
                 })
                 );
         }
-
+        */
     }
 }

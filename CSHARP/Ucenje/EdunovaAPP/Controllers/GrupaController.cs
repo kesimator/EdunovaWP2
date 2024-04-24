@@ -59,7 +59,8 @@ namespace EdunovaAPP.Controllers
             }
             try
             {
-                var p = _context.Grupe.Find(sifra);
+                var p = _context.Grupe.Include(i=> i.Smjer).Include(i=> i.Predavac)
+                    .Include(i=> i.Polaznici).FirstOrDefault(x=> x.Sifra == sifra);
                 if (p == null)
                 {
                     return new EmptyResult();
@@ -75,23 +76,94 @@ namespace EdunovaAPP.Controllers
 
 
         [HttpPost]
-        public IActionResult Post(Grupa entitet)
+        public IActionResult Post(GrupaDTOInsertUpdate dto)
         {
-            if (!ModelState.IsValid || entitet == null)
+            if (!ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
+
+            var smjer = _context.Smjerovi.Find(dto.smjer);
+
+            if (smjer == null)
+            {
+                return BadRequest();
+            }
+
+            var predavac = _context.Predavaci.Find(dto.predavac);
+
+            if (predavac == null)
+            {
+                return BadRequest();
+            }
+
+            var entitet = dto.MapGrupaInsertUpdateFromDTO(new Grupa());
+
+            entitet.Smjer = smjer;
+            entitet.Predavac = predavac;
+
             try
             {
                 _context.Grupe.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, entitet);
+                return StatusCode(StatusCodes.Status201Created, entitet.MapGrupaReadToDTO());
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status503ServiceUnavailable,
                     ex.Message);
             }
+        }
+
+        [HttpPut]
+        [Route("{sifra:int}")]
+        public IActionResult Put(int sifra, GrupaDTOInsertUpdate dto)
+        {
+            if (sifra <= 0 || !ModelState.IsValid || dto == null)
+            {
+                return BadRequest();
+            }
+
+
+            try
+            {
+                var entitet = _context.Grupe.Include(i=> i.Smjer).Include(i=> i.Predavac)
+                    .Include(i=> i.Polaznici).FirstOrDefault(x=> x.Sifra == sifra);
+                if (entitet == null)
+                {
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
+                }
+
+                var smjer = _context.Smjerovi.Find(dto.smjer);
+
+                if (smjer == null)
+                {
+                    return BadRequest();
+                }
+
+                var predavac = _context.Predavaci.Find(dto.predavac);
+
+                if (predavac == null)
+                {
+                    return BadRequest();
+                }
+
+                entitet = dto.MapGrupaInsertUpdateFromDTO(entitet);
+
+                entitet.Smjer = smjer;
+                entitet.Predavac = predavac;
+
+                _context.Grupe.Update(entitet);
+                _context.SaveChanges();
+
+                return StatusCode(StatusCodes.Status200OK, entitet.MapGrupaReadToDTO());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ex.Message);
+            }
+
         }
 
         [HttpDelete]
