@@ -1,0 +1,6 @@
+@F1TimoviAPP_HostAddress = http://localhost:5203
+
+GET {{F1TimoviAPP_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
