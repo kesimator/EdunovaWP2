@@ -49,7 +49,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    // Moguænost generiranja poziva rute u CMD i Powershell
+    app.UseSwaggerUI(opcije =>
+    {
+        opcije.ConfigObject.
+        AdditionalItems.Add("requestSnippetsEnabled", true);
+    });
 }
 
 app.UseHttpsRedirection();
