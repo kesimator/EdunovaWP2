@@ -34,12 +34,30 @@ namespace F1TimoviAPP.Controllers
         ///     
         /// </remarks>
         /// <returns>Timovi u bazi</returns>
-        /// <response code="200">Sve OK</response>
+        /// <response code="200">Sve OK, ako nema podataka - content-length: 0</response>
         /// <response code="400">Zahtjev nije valjan</response>
+        /// <response code="503">Baza na koju se spajam nije dostupna</response>
         [HttpGet]
         public IActionResult Get()
         {
-            return new JsonResult(_context.Timovi.ToList());
+            // Kontrola ukoliko upit nije valjan
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var timovi = _context.Timovi.ToList();
+                if (timovi == null || timovi.Count == 0)
+                {
+                    return new EmptyResult();
+                }
+                return new JsonResult(timovi);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+            }
         }
     }
 }

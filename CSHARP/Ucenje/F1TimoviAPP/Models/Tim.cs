@@ -10,9 +10,17 @@ namespace F1TimoviAPP.Models
         /// <summary>
         /// Ime tima u bazi
         /// </summary>
-        [Required(ErrorMessage ="Ime tima obavezno!")]
+        [Required(ErrorMessage = "Ime tima obavezno!")]
         public string? ime_tima { get; set; }
+        /// <summary>
+        /// Država sjedišta tima
+        /// </summary>
+        [Required(ErrorMessage = "Država sjedišta obavezno!")]
         public string? drzava_sjedista { get; set; }
-        public int godina_osnutka { get; set; }
+        /// <summary>
+        /// Godina osnutka tima
+        /// </summary>
+        [Range(1900, 2023, ErrorMessage = "Vrijednost {0} mora biti između {1} i {2}")]
+        public int? godina_osnutka { get; set; }
     }
 }
