@@ -1,3 +1,5 @@
+using F1TimoviAPP.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,11 @@ builder.Services.AddSwaggerGen(sgo =>
     sgo.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 
 });
+
+// Dodavanje baze podataka
+builder.Services.AddDbContext<EdunovaContext>(o =>
+    o.UseSqlServer(builder.Configuration.GetConnectionString(name: "EdunovaContext"))
+);
 
 
 var app = builder.Build();

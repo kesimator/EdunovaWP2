@@ -17,7 +17,9 @@ namespace F1TimoviAPP.Data
         {
 
         }
-
+        /// <summary>
+        /// Timovi u bazi
+        /// </summary>
         public DbSet<Tim> Timovi { get; set; }
     }
 }
