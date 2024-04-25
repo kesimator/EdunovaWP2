@@ -11,6 +11,17 @@ async function getTimovi() {
         });
 }
 
+async function deleteTim(id) {
+    return await httpService.delete('/Tim/' + id)
+        .then((res) => {
+            if (App.DEV) console.table(res);
+            return res;
+        }).catch((e) => {
+            console.log(e);
+        });
+}
+
 export default {
-    getTimovi
+    getTimovi,
+    deleteTim
 };
