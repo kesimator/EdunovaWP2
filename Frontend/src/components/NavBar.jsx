@@ -24,7 +24,11 @@ function NavBar() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <NavDropdown title="Programi" id="basic-nav-dropdown">
-                            <NavDropdown.Item>Timovi</NavDropdown.Item>
+                            <NavDropdown.Item
+                                onClick={() => navigate(RoutesNames.TIMOVI_PREGLED)}
+                            >
+                                Timovi
+                            </NavDropdown.Item>
                         </NavDropdown>
                     </Nav>
                 </Navbar.Collapse>

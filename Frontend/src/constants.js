@@ -1,3 +1,8 @@
 export const RoutesNames = {
-    HOME: '/'
+    HOME: '/',
+    TIMOVI_PREGLED: '/timovi'
 };
+
+export const App = {
+    DEV: true
+}
