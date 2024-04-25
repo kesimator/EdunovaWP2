@@ -7,4 +7,4 @@ export const RoutesNames = {
 
 export const App = {
     DEV: true
-}
+};

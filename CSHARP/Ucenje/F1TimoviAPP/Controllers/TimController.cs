@@ -124,7 +124,7 @@ namespace F1TimoviAPP.Controllers
         /// <summary>
         /// Mijenja podatke postojećeg tima u bazi
         /// </summary>
-        /// <param name="id">Šifra smjera koji se mijenja</param>
+        /// <param name="id">Šifra tima koji se mijenja</param>
         /// <param name="tim">Tim za unijeti u JSON formatu</param>
         /// <returns>Svi poslani podaci od tima koji su spremljeni u bazi</returns>
         /// <response code="200">Sve je u redu</response>
@@ -173,7 +173,7 @@ namespace F1TimoviAPP.Controllers
         ///     DELETE api/v1/tim/1
         ///     
         /// </remarks>
-        /// <param name="id">Šifra smjera koji se briše</param>
+        /// <param name="id">Šifra tima koji se briše</param>
         /// <returns>Odgovori je li obrisano ili ne</returns>
         /// <response code="200">Sve je u redu, obrisano je u bazi</response>
         /// <response code="204">U bazi nema tima kojeg želimo promijeniti</response>
@@ -199,7 +199,7 @@ namespace F1TimoviAPP.Controllers
                 _context.Timovi.Remove(timIzBaze);
                 _context.SaveChanges();
 
-                return new JsonResult("{\"poruka\": \"Obrisano\"}");    // Ovo nije baš najbolja praksa, ali se i to može
+                return new JsonResult(new { poruka = "Obrisano" });    // Ovo nije baš najbolja praksa, ali se i to može
             }
             catch (Exception ex)
             {

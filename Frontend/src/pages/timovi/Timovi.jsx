@@ -63,7 +63,7 @@ export default function Timovi() {
                             <td className="sredina">
                                 <Button
                                     variant="primary"
-                                    onClick={() => { navigate(`/timovi/${tim.id}`) }}>
+                                    onClick={() => { navigate(`/timovi/${tim.id}`)}}>
                                     <FaEdit
                                         size={25}
                                     />
