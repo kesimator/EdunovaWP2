@@ -89,7 +89,7 @@ export default function TimoviPromijeni() {
                             variant="primary"
                             type="submit"
                         >
-                            Promijeni smjer
+                            Promijeni tim
                         </Button>
                     </Col>
                 </Row>
