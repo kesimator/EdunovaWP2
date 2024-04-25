@@ -26,11 +26,16 @@ export default function Timovi() {
 
     async function obrisiTim(id) {
         const odgovor = await TimService.obrisiTim(id);
-        if (odgovor.ok) {
-            alert(odgovor.poruka.data.poruka);
+        if (odgovor && odgovor.ok) {
+            if (odgovor.poruka && odgovor.poruka.data && odgovor.poruka.data.poruka) {
+                alert(odgovor.poruka.data.poruka);
+            } else {
+                alert('Tim uspješno obrisan');
+            }
             dohvatiTimove();
+        } else {
+            alert('Došlo je do greške prilikom brisanja tima');
         }
-
     }
 
     return (
@@ -58,7 +63,7 @@ export default function Timovi() {
                             <td className="sredina">
                                 <Button
                                     variant="primary"
-                                    onClick={() => { navigate(`/timovi/${tim.id}`)}}>
+                                    onClick={() => { navigate(`/timovi/${tim.id}`) }}>
                                     <FaEdit
                                         size={25}
                                     />
