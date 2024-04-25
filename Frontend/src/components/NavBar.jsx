@@ -25,9 +25,13 @@ function NavBar() {
                     <Nav className="me-auto">
                         <NavDropdown title="Programi" id="basic-nav-dropdown">
                             <NavDropdown.Item>Timovi</NavDropdown.Item>
-                           
                         </NavDropdown>
                     </Nav>
+                </Navbar.Collapse>
+                <Navbar.Collapse className="justify-content-end">
+                    <Nav.Link target="_blank" href="https://mkesinovi-001-site1.ctempurl.com/swagger/index.html">
+                        API dokumentacija
+                    </Nav.Link>
                 </Navbar.Collapse>
             </Container>
         </Navbar>
