@@ -15,7 +15,7 @@ namespace F1TimoviAPP.Models
         /// <summary>
         /// Država sjedišta tima
         /// </summary>
-        [Required(ErrorMessage = "Država sjedišta obavezno!")]
+        //[Required(ErrorMessage = "Država sjedišta obavezno!")]
         public string? Drzava_sjedista { get; set; }
         /// <summary>
         /// Godina osnutka tima

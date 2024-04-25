@@ -62,6 +62,35 @@ namespace F1TimoviAPP.Controllers
         }
 
         /// <summary>
+        /// Dohvaća tim sa šifrom
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("{id:int}")]
+        public IActionResult GetById(int id)
+        {
+            // Kontrola ukoliko upit nije valjan
+            if (!ModelState.IsValid || id <= 0)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var tim = _context.Timovi.Find(id);
+                if (tim == null)
+                {
+                    return new EmptyResult();
+                }
+                return new JsonResult(tim);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Dodaje novi tim u bazu
         /// </summary>
         /// <remarks>

@@ -11,17 +11,54 @@ async function getTimovi() {
         });
 }
 
-async function deleteTim(id) {
+async function obrisiTim(id) {
     return await httpService.delete('/Tim/' + id)
         .then((res) => {
-            if (App.DEV) console.table(res);
-            return res;
+            return { ok: true, poruka: res };
         }).catch((e) => {
             console.log(e);
         });
 }
 
+async function dodajTim(tim) {
+    const odgovor = await httpService.post('/Tim', tim)
+        .then(() => {
+            return { ok: true, poruka: 'Uspješno dodano' }
+        })
+        .catch((e) => {
+            console.log(e.response.data.errors);
+            return { ok: false, poruka: 'Greška' }
+        });
+    return odgovor;
+}
+
+async function promijeniTim(id, tim) {
+    const odgovor = await httpService.put('/Tim/' + id, tim)
+        .then(() => {
+            return { ok: true, poruka: 'Uspješno promijenjeno' }
+        })
+        .catch((e) => {
+            console.log(e.response.data.errors);
+            return { ok: false, poruka: 'Greška' }
+        });
+    return odgovor;
+}
+
+async function getById(id) {
+    return await httpService.get('/Tim/' + id)
+        .then((res) => {
+            if (App.DEV) console.table(res.data);
+            return res;
+        }).catch((e) => {
+            console.log(e);
+            return { poruka: e }
+        });
+}
+
 export default {
     getTimovi,
-    deleteTim
+    obrisiTim,
+    dodajTim,
+    promijeniTim,
+    getById
 };

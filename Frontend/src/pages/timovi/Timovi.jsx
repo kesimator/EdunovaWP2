@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Container, Table } from "react-bootstrap";
+import { Button, Container, Table } from "react-bootstrap";
 import TimService from "../../services/TimService";
 import { MdAddCircleOutline } from "react-icons/md";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RoutesNames } from "../../constants";
 
 export default function Timovi() {
     const [timovi, setTimovi] = useState();
+    const navigate = useNavigate();
 
     async function dohvatiTimove() {
         await TimService.getTimovi()
@@ -23,14 +24,13 @@ export default function Timovi() {
         dohvatiTimove();
     }, []);
 
-    async function obrisi(tim) {
-        await TimService.deleteTim(tim.id)
-            .then((res) => {
-                dohvatiTimove();
-            })
-            .catch((e) => {
-                alert(e);
-            });
+    async function obrisiTim(id) {
+        const odgovor = await TimService.obrisiTim(id);
+        if (odgovor.ok) {
+            alert(odgovor.poruka.data.poruka);
+            dohvatiTimove();
+        }
+
     }
 
     return (
@@ -56,18 +56,23 @@ export default function Timovi() {
                             <td className="desno">{tim.drzava_sjedista}</td>
                             <td className="desno">{tim.godina_osnutka}</td>
                             <td className="sredina">
-                                <Link to={RoutesNames.TIMOVI_PROMIJENI}>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => { navigate(`/timovi/${tim.id}`)}}>
                                     <FaEdit
                                         size={25}
                                     />
-                                </Link>
+                                </Button>
 
                                 &nbsp;&nbsp;&nbsp;
-                                <Link onClick={obrisi(tim)}>
+                                <Button
+                                    variant="danger"
+                                    onClick={() => obrisiTim(tim.id)}
+                                >
                                     <FaTrash
                                         size={25}
                                     />
-                                </Link>
+                                </Button>
                             </td>
                         </tr>
                     ))}
